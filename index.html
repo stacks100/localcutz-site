@@ -171,6 +171,11 @@ section.block{padding-block:96px}
 .tag{font-size:13px;padding:5px 11px;border-radius:999px;background:var(--surface);border:1px solid var(--line)}
 @media (max-width:860px){.crew{grid-template-columns:1fr}.portrait{aspect-ratio:16/9}}
 
+.barber-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.barber-links .btn{padding:11px 18px;font-size:14px}
+.chip-link{display:inline-flex;align-items:center;font:600 13px var(--body);padding:10px 14px;border-radius:999px;border:1px solid var(--line);text-decoration:none;color:var(--ink);background:var(--surface);transition:border-color .15s}
+.chip-link:hover{border-color:var(--ink)}
+
 /* steps */
 .steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
 .step{border-top:3px solid var(--ink);padding-top:22px;display:grid;gap:10px;align-content:start}
@@ -347,6 +352,7 @@ footer .col{display:grid;gap:8px;align-content:start;font-size:15px}
             <h3>Marcus</h3>
             <p>Fades that blend clean every time and lineups that stay sharp for days.</p>
             <div class="tags"><span class="tag">Skin fades</span><span class="tag">Lineups</span><span class="tag">Designs</span></div>
+            <div class="barber-links" data-barber="marcus"></div>
           </div>
         </article>
         <article class="barber">
@@ -356,6 +362,7 @@ footer .col{display:grid;gap:8px;align-content:start;font-size:15px}
             <h3>Dre</h3>
             <p>The beard guy. Hot towel shaves and razor-sharp shaping.</p>
             <div class="tags"><span class="tag">Beards</span><span class="tag">Hot towel</span><span class="tag">Tapers</span></div>
+            <div class="barber-links" data-barber="dre"></div>
           </div>
         </article>
         <article class="barber">
@@ -365,6 +372,7 @@ footer .col{display:grid;gap:8px;align-content:start;font-size:15px}
             <h3>Jay</h3>
             <p>Great with kids and first-timers. Calm chair, clean results.</p>
             <div class="tags"><span class="tag">Kids cuts</span><span class="tag">Classic cuts</span><span class="tag">Curls</span></div>
+            <div class="barber-links" data-barber="jay"></div>
           </div>
         </article>
       </div>
@@ -507,6 +515,17 @@ const SHOP = {
 };
 /* ================================== */
 
+/* ===== Each barber's personal links =====
+   booking: their own booking page (Booksy, Square, website...)
+   Leave "" if they don't have one. With no booking link,
+   "Book with ___" scrolls to the shop phone number instead. */
+const BARBERS = {
+  marcus: { name: "Marcus", booking: "", instagram: "", tiktok: "", website: "" },
+  dre:    { name: "Dre",    booking: "", instagram: "", tiktok: "", website: "" },
+  jay:    { name: "Jay",    booking: "", instagram: "", tiktok: "", website: "" }
+};
+/* ======================================== */
+
 const $=id=>document.getElementById(id);
 const DAYS=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 const fmt=t=>{let[h,m]=t.split(":").map(Number);const ap=h>=12?"pm":"am";h=h%12||12;return m?`${h}:${String(m).padStart(2,"0")}${ap}`:`${h}${ap}`};
@@ -549,6 +568,21 @@ $("copy-phone").addEventListener("click",()=>{
   const out=$("copied");
   const sel=()=>{const r=document.createRange();r.selectNodeContents($("phone"));const s=getSelection();s.removeAllRanges();s.addRange(r);out.textContent="Selected"};
   try{navigator.clipboard.writeText(SHOP.phone).then(()=>{out.textContent="Copied";setTimeout(()=>out.textContent="",2000)},sel)}catch(e){sel()}
+});
+
+/* barber links */
+const isUrl=u=>/^https?:\/\//i.test(u);
+const web=u=>isUrl(u)?u:"https://"+u;
+const handle=(base)=>h=>isUrl(h)?h:base+h.replace(/^@/,"");
+document.querySelectorAll(".barber-links").forEach(box=>{
+  const b=BARBERS[box.dataset.barber];if(!b)return;
+  const book=document.createElement("a");book.className="btn red";book.textContent="Book with "+b.name;
+  if(b.booking){book.href=web(b.booking);book.target="_blank";book.rel="noopener"}else{book.href="#visit"}
+  box.append(book);
+  [["instagram","Instagram",handle("https://instagram.com/")],["tiktok","TikTok",handle("https://www.tiktok.com/@")],["website","Website",web]].forEach(([k,label,toUrl])=>{
+    if(!b[k])return;
+    const a=document.createElement("a");a.className="chip-link";a.textContent=label;a.href=toUrl(b[k]);a.target="_blank";a.rel="noopener";box.append(a);
+  });
 });
 
 /* tabs */
